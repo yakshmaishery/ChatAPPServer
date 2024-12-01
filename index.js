@@ -55,7 +55,7 @@ io.on('connection', (socket) => {
       socket.broadcast.emit("recivedMessage",Data)
     })
     socket.on("UserloggedIn",(data) => {
-      users[socket.id] = username;
+      users[socket.id] = data;
       socket.broadcast.emit("UserloggedInNotice",data)
     })
 
