@@ -19,7 +19,8 @@ app.use(cors({
    credentials: true,
 }));
 
-let LoginIDList = []
+// Store connected users
+let users = {};
 
 // Serve a basic route
 app.get('/', (req, res) => {
@@ -54,6 +55,7 @@ io.on('connection', (socket) => {
       socket.broadcast.emit("recivedMessage",Data)
     })
     socket.on("UserloggedIn",(data) => {
+      users[socket.id] = username;
       socket.broadcast.emit("UserloggedInNotice",data)
     })
 
@@ -62,6 +64,10 @@ io.on('connection', (socket) => {
       //   console.log('User disconnected:', socket.id);
       //   const index = LoginIDList.findIndex(prop => prop.ID === socket.id)
       //   LoginIDList.splice(index,1)
+      const username = users[socket.id];
+      // Remove the user from the list
+      delete users[socket.id];
+      socket.broadcast.emit("disconnectUser",username)
     });
 });
 
