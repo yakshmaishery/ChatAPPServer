@@ -53,6 +53,9 @@ io.on('connection', (socket) => {
       }
       socket.broadcast.emit("recivedMessage",Data)
     })
+    socket.on("UserloggedIn",(data) => {
+      socket.broadcast.emit("UserloggedInNotice",data)
+    })
 
     // Handle disconnection
     socket.on('disconnect', () => {
