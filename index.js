@@ -29,45 +29,37 @@ app.get('/', (req, res) => {
 
 // Listen for connection events
 io.on('connection', (socket) => {
-   //  console.log('A user connected:', socket.id);
+    // console.log('A user connected:', socket.id);
 
-    // Listen for custom events from the client
-   //  socket.on('message', (data) => {
-   //      console.log('Message received:', data);
+     // Listen for the joinRoom event with a random key
+    socket.on('joinRoom', (roomKey) => {
+      const roomExists = io.sockets.adapter.rooms.has(roomKey);
+      // console.log(`User joined room: ${roomKey}`);
+      socket.join(roomKey);
 
-   //      // Emit a response back to the client
-   //      socket.emit('response', 'Message received: ' + data);
-   //  });
-   //  socket.on("LoginID",(data) => {
-   //    let checker = LoginIDList.some((e)=>{return e.LoginID == data.LoginID})
-   //    if(!checker){
-   //       LoginIDList.push({LoginID:data.LoginID,ID:data.ID})
-   //    }
-   //    socket.emit("LoginIDresponse",!checker)
-   //  })
-
-    socket.on("SendMessage",(data) => {
-      let Data = {
-         senderID:data.ID,
-         senderEmail:data.EmailID,
-         senderMessage:data.Msg,
+      // Notify others in the room
+      if(roomExists){
+        socket.emit('joinRoomMessage', {msg:`User joined existing room: ${roomKey}`,key:roomKey});
       }
-      socket.broadcast.emit("recivedMessage",Data)
-    })
-    socket.on("UserloggedIn",(data) => {
-      users[socket.id] = data;
-      socket.broadcast.emit("UserloggedInNotice",data)
-    })
+      else{
+        socket.emit('joinRoomMessage', {msg:`User created and joined new room: ${roomKey}`,key:roomKey});
+      }
+    });
+
+    // Listen for 'sendMessage' events
+    socket.on('sendMessage', ({ CurrentLoginID,currentGroupID, message }) => {
+      // console.log(`Message from ${socket.id} to room ${currentGroupID}: ${message}`);
+
+      // Broadcast the message to everyone in the room
+      io.to(currentGroupID).emit('message', {CurrentLoginID:CurrentLoginID,message:message});
+    });
 
     // Handle disconnection
     socket.on('disconnect', () => {
-      //   console.log('User disconnected:', socket.id);
-      //   const index = LoginIDList.findIndex(prop => prop.ID === socket.id)
-      //   LoginIDList.splice(index,1)
-      const username = users[socket.id];
-      // Remove the user from the list
-      delete users[socket.id];
-      socket.broadcast.emit("disconnectUser",username)
+      // const username = users[socket.id];
+      // // Remove the user from the list
+      // delete users[socket.id];
+      // socket.broadcast.emit("disconnectUser",username)
     });
 });
 
