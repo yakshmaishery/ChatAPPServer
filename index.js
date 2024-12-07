@@ -32,17 +32,17 @@ io.on('connection', (socket) => {
     // console.log('A user connected:', socket.id);
 
      // Listen for the joinRoom event with a random key
-    socket.on('joinRoom', (roomKey) => {
-      const roomExists = io.sockets.adapter.rooms.has(roomKey);
+    socket.on('joinRoom', ({joinGroupID,CurrentLoginID}) => {
+      const roomExists = io.sockets.adapter.rooms.has(joinGroupID);
       // console.log(`User joined room: ${roomKey}`);
-      socket.join(roomKey);
+      socket.join(joinGroupID);
 
       // Notify others in the room
       if(roomExists){
-        socket.emit('joinRoomMessage', {msg:`User joined existing room: ${roomKey}`,key:roomKey});
+        io.to(joinGroupID).emit('joinRoomMessage', {msg:`User ${CurrentLoginID} joined existing room: ${joinGroupID}`,key:joinGroupID});
       }
       else{
-        socket.emit('joinRoomMessage', {msg:`User created and joined new room: ${roomKey}`,key:roomKey});
+        socket.emit('joinRoomMessage', {msg:`User created and joined new room: ${joinGroupID}`,key:joinGroupID});
       }
     });
 
@@ -52,6 +52,14 @@ io.on('connection', (socket) => {
 
       // Broadcast the message to everyone in the room
       io.to(currentGroupID).emit('message', {CurrentLoginID:CurrentLoginID,message:message});
+    });
+
+    // Leave a room
+    socket.on('leaveRoom', ({CurrentLoginID,currentGroupID}) => {
+      socket.leave(currentGroupID);
+      console.log(`User ${socket.id} left room: ${currentGroupID}`);
+      let message = `User ${CurrentLoginID} left room: ${currentGroupID}`
+      socket.emit('leaveRoomMessage', {CurrentLoginID:CurrentLoginID,message:message});
     });
 
     // Handle disconnection
