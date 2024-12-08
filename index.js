@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
       socket.leave(currentGroupID);
       let message = `User ${CurrentLoginID} left room: ${currentGroupID}`
       socket.emit('leaveRoomMessage', {CurrentLoginID:CurrentLoginID,message:message});
-      socket.to(currentGroupID).emit("leaveRoomMessageToAll",{CurrentLoginID:CurrentLoginID,message:message})
+      io.to(currentGroupID).emit("leaveRoomMessageToAll",{CurrentLoginID:CurrentLoginID,message:message})
     });
 
     // Handle disconnection
