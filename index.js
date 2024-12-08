@@ -59,7 +59,7 @@ io.on('connection', (socket) => {
       socket.leave(currentGroupID);
       // console.log(`User ${socket.id} left room: ${currentGroupID}`);
       let message = `User ${CurrentLoginID} left room: ${currentGroupID}`
-      io.to(currentGroupID).emit('leaveRoomMessage', {CurrentLoginID:CurrentLoginID,message:message});
+      socket.emit('leaveRoomMessage', {CurrentLoginID:CurrentLoginID,message:message});
     });
 
     // Handle disconnection
