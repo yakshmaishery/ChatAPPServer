@@ -1,6 +1,7 @@
 const express = require('express'); // Import Express
 const http = require('http'); // Import HTTP module
 const { Server } = require('socket.io'); // Import Socket.IO
+const path = require('path');
 
 const app = express(); // Create an Express app
 const server = http.createServer(app); // Create an HTTP server
@@ -23,8 +24,11 @@ app.use(cors({
 let users = {};
 
 // Serve a basic route
-app.get('/', (req, res) => {
-    res.send('Socket.IO server is running!');
+// app.get('/', (req, res) => {
+//     res.send('Socket.IO server is running!');
+// });
+app.get('/', function(req, res) {
+  res.sendFile(path.join(__dirname, '/Index.html'));
 });
 
 // Listen for connection events
@@ -34,7 +38,6 @@ io.on('connection', (socket) => {
      // Listen for the joinRoom event with a random key
     socket.on('joinRoom', ({joinGroupID,CurrentLoginID}) => {
       const roomExists = io.sockets.adapter.rooms.has(joinGroupID);
-      // console.log(`User joined room: ${roomKey}`);
       socket.join(joinGroupID);
 
       // Notify others in the room
@@ -48,8 +51,6 @@ io.on('connection', (socket) => {
 
     // Listen for 'sendMessage' events
     socket.on('sendMessage', ({ CurrentLoginID,currentGroupID, message }) => {
-      // console.log(`Message from ${socket.id} to room ${currentGroupID}: ${message}`);
-
       // Broadcast the message to everyone in the room
       io.to(currentGroupID).emit('message', {CurrentLoginID:CurrentLoginID,message:message});
     });
@@ -57,7 +58,6 @@ io.on('connection', (socket) => {
     // Leave a room
     socket.on('leaveRoom', ({CurrentLoginID,currentGroupID}) => {
       socket.leave(currentGroupID);
-      // console.log(`User ${socket.id} left room: ${currentGroupID}`);
       let message = `User ${CurrentLoginID} left room: ${currentGroupID}`
       socket.emit('leaveRoomMessage', {CurrentLoginID:CurrentLoginID,message:message});
       socket.to(currentGroupID).emit("leaveRoomMessageToAll",{CurrentLoginID:CurrentLoginID,message:message})
@@ -66,8 +66,6 @@ io.on('connection', (socket) => {
     // Handle disconnection
     socket.on('disconnect', () => {
       // const username = users[socket.id];
-      // // Remove the user from the list
-      // delete users[socket.id];
       // socket.broadcast.emit("disconnectUser",username)
     });
 });
@@ -75,5 +73,5 @@ io.on('connection', (socket) => {
 // Start the server
 const PORT = 3000;
 server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running...`);
 });
