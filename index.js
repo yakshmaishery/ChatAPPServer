@@ -63,6 +63,28 @@ app.get('/Messages', (req, res) => {
   });
 });
 
+// API endpoint to fetch users with WHERE and ORDER BY
+app.get('/GETUserbyRoom', (req, res) => {
+  const { search, sort = 'DESC' } = req.query;
+
+  try {
+    // SQL query with WHERE and ORDER BY
+    const query = `
+      SELECT id, UserLoginID, Message, Datetime,RoomID 
+      FROM users 
+      WHERE name = ? 
+      ORDER BY id ${sort === 'ASC' ? 'ASC' : 'DESC'}
+    `;
+    const params = [`${search || ''}`]; // Search for a name containing the keyword
+
+    const rows = db.prepare(query).all(params);
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error('Error fetching data:', err.message);
+    res.status(500).send('Error fetching data.');
+  }
+});
+
 // Truncate Table
 app.get('/TruncateMessages', (req, res) => {
   try {
