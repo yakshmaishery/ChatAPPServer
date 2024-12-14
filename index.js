@@ -34,6 +34,9 @@ app.get('/', function(req, res) {
 // Listen for connection events
 io.on('connection', (socket) => {
     // console.log('A user connected:', socket.id);
+    let UserlLoginID = socket.handshake.query.CurrentLoginID
+    // console.warn(UserlLoginID)
+    socket.broadcast.emit("UserLoggedIN",UserlLoginID)
 
      // Listen for the joinRoom event with a random key
     socket.on('joinRoom', ({joinGroupID,CurrentLoginID}) => {
