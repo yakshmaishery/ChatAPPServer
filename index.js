@@ -72,7 +72,7 @@ app.get('/GETUserbyRoom', (req, res) => {
     const query = `
       SELECT id, UserLoginID, Message, Datetime,RoomID 
       FROM users 
-      WHERE name = ? 
+      WHERE RoomID = ? 
       ORDER BY id ${sort === 'ASC' ? 'ASC' : 'DESC'}
     `;
     const params = [`${search || ''}`]; // Search for a name containing the keyword
