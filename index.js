@@ -21,7 +21,7 @@ app.use(cors({
 }));
 
 // Store connected users
-let users = {};
+let users = [];
 
 // Serve a basic route
 // app.get('/', (req, res) => {
@@ -42,6 +42,12 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', ({joinGroupID,CurrentLoginID}) => {
       const roomExists = io.sockets.adapter.rooms.has(joinGroupID);
       socket.join(joinGroupID);
+      let checker = users.some(item => item.CurrentLoginID == CurrentLoginID)
+      if(checker){
+      }
+      else{
+        users.push({socketID:socket.id,CurrentLoginID:CurrentLoginID,roomID:joinGroupID})
+      }
 
       // Notify others in the room
       if(roomExists){
@@ -62,6 +68,7 @@ io.on('connection', (socket) => {
     socket.on('leaveRoom', ({CurrentLoginID,currentGroupID}) => {
       socket.leave(currentGroupID);
       let message = `User ${CurrentLoginID} left room: ${currentGroupID}`
+      users.splice(users.findIndex(item => item.CurrentLoginID == CurrentLoginID))
       socket.emit('leaveRoomMessage', {CurrentLoginID:CurrentLoginID,message:message});
       io.to(currentGroupID).emit("leaveRoomMessageToAll",{CurrentLoginID:CurrentLoginID,message:message})
     });
@@ -69,6 +76,15 @@ io.on('connection', (socket) => {
     // Handle disconnection
     socket.on('disconnect', () => {
       // const username = users[socket.id];
+      let userleave = users.filter(item => item.socketID == socket.id)
+      if(userleave){
+        if(userleave.length){
+          let CurrentLoginID = userleave[0].CurrentLoginID
+          let currentGroupID = userleave[0].roomID
+          let message = `User ${CurrentLoginID} left room: ${currentGroupID}`
+          io.to(currentGroupID).emit("leaveRoomMessageToAll",{CurrentLoginID:CurrentLoginID,message:message})
+        }
+      }
       // socket.broadcast.emit("disconnectUser",username)
     });
 });
