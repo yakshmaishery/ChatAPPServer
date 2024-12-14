@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
     // Leave a room
     socket.on('leaveRoom', ({CurrentLoginID,currentGroupID}) => {
       socket.leave(currentGroupID);
-      let message = `User ${CurrentLoginID} left room: ${currentGroupID}`
+      let message = `User <b>${CurrentLoginID}</b> left room: <b>${currentGroupID}</b>`
       users.splice(users.findIndex(item => item.CurrentLoginID == CurrentLoginID))
       socket.emit('leaveRoomMessage', {CurrentLoginID:CurrentLoginID,message:message});
       io.to(currentGroupID).emit("leaveRoomMessageToAll",{CurrentLoginID:CurrentLoginID,message:message})
