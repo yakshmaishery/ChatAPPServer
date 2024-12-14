@@ -52,7 +52,7 @@ app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, '/Index.html'));
 });
 
-// Sample route
+// get All Messages
 app.get('/Messages', (req, res) => {
   db.all('SELECT * FROM users', [], (err, rows) => {
     if (err) {
@@ -61,6 +61,22 @@ app.get('/Messages', (req, res) => {
       res.json(rows);
     }
   });
+});
+
+// Truncate Table
+app.get('/TruncateMessages', (req, res) => {
+  try {
+    // Delete all rows from the table
+    db.prepare('DELETE FROM users').run();
+
+    // Reset the AUTOINCREMENT value
+    db.prepare("DELETE FROM sqlite_sequence WHERE name = 'users'").run();
+
+    res.send('Table truncated and AUTOINCREMENT reset successfully!');
+  } catch (err) {
+    console.error('Error truncating table:', err.message);
+    res.status(500).send('Error truncating table.');
+  }
 });
 
 // Listen for connection events
