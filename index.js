@@ -2,6 +2,27 @@ const express = require('express'); // Import Express
 const http = require('http'); // Import HTTP module
 const { Server } = require('socket.io'); // Import Socket.IO
 const path = require('path');
+const sqlite3 = require("sqlite3").verbose()
+
+// Connect to SQLite database
+const db = new sqlite3.Database('./database.sqlite', (err) => {
+  if (err) {
+    console.error('Error connecting to SQLite database:', err.message);
+  } else {
+    console.log('Connected to the SQLite database.');
+  }
+});
+
+// Create a table
+db.prepare(
+  `CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserLoginID TEXT NOT NULL,
+    Message TEXT NOT NULL,
+    Datetime TEXT NOT NULL,
+    RoomID TEXT NOT NULL
+  )`
+).run();
 
 const app = express(); // Create an Express app
 const server = http.createServer(app); // Create an HTTP server
@@ -29,6 +50,17 @@ let users = [];
 // });
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, '/Index.html'));
+});
+
+// Sample route
+app.get('/Messages', (req, res) => {
+  db.all('SELECT * FROM users', [], (err, rows) => {
+    if (err) {
+      res.status(500).send('Error retrieving data');
+    } else {
+      res.json(rows);
+    }
+  });
 });
 
 // Listen for connection events
@@ -61,6 +93,13 @@ io.on('connection', (socket) => {
     // Listen for 'sendMessage' events
     socket.on('sendMessage', ({ CurrentLoginID,currentGroupID, message }) => {
       // Broadcast the message to everyone in the room
+      try{
+        const stmt = db.prepare('INSERT INTO users (UserLoginID, Message, Datetime, RoomID) VALUES (?, ?, ?, ?)');
+        stmt.run(CurrentLoginID,message,new Date().toISOString(),currentGroupID)
+      }
+      catch(err){
+        console.error('Error inserting data:', err.message);
+      }
       io.to(currentGroupID).emit('message', {CurrentLoginID:CurrentLoginID,message:message});
     });
 
