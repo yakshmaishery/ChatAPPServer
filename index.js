@@ -51,10 +51,10 @@ io.on('connection', (socket) => {
 
       // Notify others in the room
       if(roomExists){
-        io.to(joinGroupID).emit('joinRoomMessage', {msg:`User ${CurrentLoginID} joined existing room: ${joinGroupID}`,key:joinGroupID});
+        io.to(joinGroupID).emit('joinRoomMessage', {msg:`User <b>${CurrentLoginID}</b> joined existing room: <b>${joinGroupID}</b>`,key:joinGroupID});
       }
       else{
-        socket.emit('joinRoomMessage', {msg:`User created and joined new room: ${joinGroupID}`,key:joinGroupID});
+        socket.emit('joinRoomMessage', {msg:`User created and joined new room: <b>${joinGroupID}</b>`,key:joinGroupID});
       }
     });
 
@@ -81,7 +81,7 @@ io.on('connection', (socket) => {
         if(userleave.length){
           let CurrentLoginID = userleave[0].CurrentLoginID
           let currentGroupID = userleave[0].roomID
-          let message = `User ${CurrentLoginID} left room: ${currentGroupID}`
+          let message = `User <b>${CurrentLoginID}</b> left room: <b>${currentGroupID}</b>`
           io.to(currentGroupID).emit("leaveRoomMessageToAll",{CurrentLoginID:CurrentLoginID,message:message})
         }
       }
