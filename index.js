@@ -149,6 +149,22 @@ io.on('connection', (socket) => {
       socket.emit('leaveRoomMessage', {CurrentLoginID:CurrentLoginID,message:message});
       io.to(currentGroupID).emit("leaveRoomMessageToAll",{CurrentLoginID:CurrentLoginID,message:message})
     });
+    // Receive and broadcast file chunks
+    socket.on('file-chunk', (data) => {
+      const { currentGroupID,CurrentLoginID, chunk, name, size, currentChunk } = data;
+
+      // Broadcast the chunk to others in the same room
+      // io.in(currentGroupID).emit('receive-file-chunk', { chunk, name, size, currentChunk });
+      socket.to(currentGroupID).emit('receive-file-chunk', { chunk, name, size, currentChunk });
+    });
+
+    // Notify when the file transfer is complete
+    socket.on('file-end', (data) => {
+      const { currentGroupID, name } = data;
+
+      // Inform all clients in the room
+      socket.to(currentGroupID).emit('receive-file-end', { name });
+    });
 
     // Handle disconnection
     socket.on('disconnect', () => {
