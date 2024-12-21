@@ -154,8 +154,7 @@ io.on('connection', (socket) => {
       const { currentGroupID,CurrentLoginID, chunk, name, size, currentChunk } = data;
 
       // Broadcast the chunk to others in the same room
-      // io.in(currentGroupID).emit('receive-file-chunk', { chunk, name, size, currentChunk });
-      socket.to(currentGroupID).emit('receive-file-chunk', { chunk, name, size, currentChunk });
+      io.in(currentGroupID).emit('receive-file-chunk', { chunk, name, size, currentChunk });
     });
 
     // Notify when the file transfer is complete
@@ -163,7 +162,7 @@ io.on('connection', (socket) => {
       const { currentGroupID, name } = data;
 
       // Inform all clients in the room
-      socket.to(currentGroupID).emit('receive-file-end', { name });
+      io.in(currentGroupID).emit('receive-file-end', { name });
     });
 
     // Handle disconnection
